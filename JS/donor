@@ -1,0 +1,121 @@
+import { auth, db } from "./firebase-config.js";
+import {
+  collection, addDoc, query,
+  where, onSnapshot, doc, deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+let currentUserId = null;
+
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUserId = user.uid;
+    loadMyListings();
+  }
+});
+
+// ── POST FOOD LISTING ────────────────────────────────────
+async function postFood() {
+  const name     = document.getElementById("food-name").value;
+  const quantity = document.getElementById("food-quantity").value;
+  const address  = document.getElementById("food-address").value;
+  const city     = document.getElementById("food-city").value;
+  const expiry   = document.getElementById("food-expiry").value;
+  const notes    = document.getElementById("food-notes").value;
+  const msg      = document.getElementById("post-message");
+
+  if (!name || !quantity || !address || !city || !expiry) {
+    msg.style.color = "red";
+    msg.textContent = "Please fill all required fields.";
+    return;
+  }
+
+  try {
+    const coords = await getCoordinates(address + ", " + city);
+
+    await addDoc(collection(db, "foodListings"), {
+      donorId:   currentUserId,
+      foodName:  name,
+      quantity:  quantity,
+      address:   address,
+      city:      city,
+      expiry:    expiry,
+      notes:     notes,
+      status:    "available",
+      lat:       coords.lat,
+      lng:       coords.lng,
+      createdAt: new Date().toISOString()
+    });
+
+    msg.style.color = "green";
+    msg.textContent = "Food listed! Volunteers can now see it. ✅";
+
+    ["food-name","food-quantity","food-address","food-city","food-expiry","food-notes"]
+      .forEach(id => document.getElementById(id).value = "");
+
+  } catch (error) {
+    msg.style.color = "red";
+    msg.textContent = "Error: " + error.message;
+  }
+}
+window.postFood = postFood;
+
+// ── GEOCODE ADDRESS ──────────────────────────────────────
+async function getCoordinates(address) {
+  const apiKey = "AIzaSyAJvZwH97rlObVgXPBO73ix3cxBoWW3U-M";
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+  try {
+    const res  = await fetch(url);
+    const data = await res.json();
+    if (data.results && data.results.length > 0) {
+      return data.results[0].geometry.location;
+    }
+  } catch(e) {}
+  return { lat: 23.1815, lng: 79.9864 }; // fallback Jabalpur
+}
+
+// ── LOAD MY LISTINGS ─────────────────────────────────────
+function loadMyListings() {
+  const listingsDiv = document.getElementById("my-listings");
+  if (!listingsDiv) return;
+
+  const q = query(
+    collection(db, "foodListings"),
+    where("donorId", "==", currentUserId)
+  );
+
+  onSnapshot(q, (snapshot) => {
+    if (snapshot.empty) {
+      listingsDiv.innerHTML = "<p style='color:#888'>No listings yet. Post your first food above!</p>";
+      return;
+    }
+    listingsDiv.innerHTML = "";
+    snapshot.forEach((docSnap) => {
+      const d = docSnap.data();
+      const statusColor =
+        d.status === "available" ? "#16a34a" :
+        d.status === "accepted"  ? "orange"  : "#aaa";
+
+      listingsDiv.innerHTML += `
+        <div class="listing-card">
+          <h3>${d.foodName} — ${d.quantity} plates</h3>
+          <p>📍 ${d.address}, ${d.city}</p>
+          <p>⏰ Until: ${new Date(d.expiry).toLocaleString()}</p>
+          <p>Status: <strong style="color:${statusColor}">${d.status.toUpperCase()}</strong></p>
+          <button onclick="deleteListing('${docSnap.id}')"
+            style="background:red;width:auto;padding:.3rem .8rem;font-size:12px;margin-top:.5rem;">
+            🗑 Delete
+          </button>
+        </div>`;
+    });
+  });
+}
+
+// ── DELETE LISTING ───────────────────────────────────────
+async function deleteListing(listingId) {
+  if (confirm("Delete this listing?")) {
+    await deleteDoc(doc(db, "foodListings", listingId));
+  }
+}
+window.deleteListing = deleteListing;
