@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RescueBite — Fight Food Waste</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --green:  #2d6a4f;
+      --lime:   #95d5b2;
+      --cream:  #fefae0;
+      --earth:  #b5838d;
+      --dark:   #1a1a1a;
+      --text:   #2c2c2c;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1.2rem 5%;
+      background: rgba(254,250,224,.88);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid rgba(45,106,79,.12);
+    }
+    .logo {
+      font-family: 'Fraunces', serif;
+      font-size: 1.55rem; font-weight: 900;
+      color: var(--green); letter-spacing: -0.5px;
+    }
+    .logo span { color: var(--earth); }
+    nav ul { list-style: none; display: flex; gap: 2rem; }
+    nav ul a {
+      text-decoration: none; font-size: .9rem; font-weight: 500;
+      color: var(--text); transition: color .2s;
+    }
+    nav ul a:hover { color: var(--green); }
+    .nav-cta {
+      background: var(--green); color: #fff !important;
+      padding: .55rem 1.3rem; border-radius: 100px;
+    }
+    .nav-cta:hover { background: #1f4d39 !important; color:#fff !important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; gap: 4rem;
+      padding: 8rem 5% 5rem;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; top: -120px; right: -120px;
+      width: 550px; height: 550px;
+      background: radial-gradient(circle, rgba(149,213,178,.45) 0%, transparent 70%);
+      border-radius: 50%; pointer-events: none;
+    }
+    .hero-tag {
+      display: inline-block;
+      background: rgba(45,106,79,.12); color: var(--green);
+      font-size: .78rem; font-weight: 500; letter-spacing: .08em; text-transform: uppercase;
+      padding: .4rem 1rem; border-radius: 100px; margin-bottom: 1.4rem;
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: clamp(2.8rem, 5vw, 4.5rem);
+      line-height: 1.08; font-weight: 900; color: var(--dark);
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em { font-style: italic; color: var(--green); }
+    .hero p {
+      font-size: 1.05rem; line-height: 1.75; color: #555;
+      max-width: 460px; margin-bottom: 2.2rem;
+    }
+    .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-primary {
+      background: var(--green); color: #fff;
+      padding: .85rem 2rem; border-radius: 100px;
+      text-decoration: none; font-weight: 500; font-size: .95rem;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 20px rgba(45,106,79,.3);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(45,106,79,.4); }
+    .btn-outline {
+      border: 2px solid var(--green); color: var(--green);
+      padding: .8rem 1.8rem; border-radius: 100px;
+      text-decoration: none; font-weight: 500; font-size: .95rem;
+      transition: background .2s, color .2s;
+    }
+    .btn-outline:hover { background: var(--green); color: #fff; }
+
+    /* hero illustration */
+    .hero-visual {
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+    }
+    .hero-card {
+      background: #fff; border-radius: 24px;
+      padding: 2rem; width: 320px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.1);
+      animation: floatCard 4s ease-in-out infinite;
+    }
+    @keyframes floatCard {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-12px); }
+    }
+    .card-emoji { font-size: 3rem; margin-bottom: .8rem; }
+    .card-title { font-family:'Fraunces',serif; font-size:1.3rem; font-weight:700; color:var(--dark); margin-bottom:.4rem; }
+    .card-sub { font-size:.85rem; color:#888; margin-bottom:1.2rem; }
+    .card-bar { height:8px; background:#eee; border-radius:100px; overflow:hidden; margin-bottom:.5rem; }
+    .card-bar-fill { height:100%; background:linear-gradient(90deg,var(--lime),var(--green)); border-radius:100px; width:72%; }
+    .card-stat { font-size:.78rem; color:#aaa; }
+    .badge {
+      position:absolute; top:-18px; right:-18px;
+      background:var(--earth); color:#fff;
+      font-size:.75rem; font-weight:500; padding:.5rem .9rem; border-radius:100px;
+      box-shadow: 0 4px 14px rgba(181,131,141,.4);
+    }
+
+    /* ── STATS ── */
+    .stats {
+      background: var(--green); color: #fff;
+      padding: 4rem 5%;
+      display: grid; grid-template-columns: repeat(3,1fr); gap: 2rem; text-align: center;
+    }
+    .stat-num {
+      font-family: 'Fraunces', serif; font-size: 3rem; font-weight: 900;
+      color: var(--lime); line-height: 1;
+    }
+    .stat-label { font-size: .9rem; opacity: .8; margin-top: .4rem; }
+
+    /* ── HOW IT WORKS ── */
+    .how { padding: 6rem 5%; }
+    .section-header { text-align: center; margin-bottom: 4rem; }
+    .section-tag {
+      display: inline-block;
+      background: rgba(45,106,79,.1); color: var(--green);
+      font-size: .75rem; font-weight: 500; letter-spacing: .1em; text-transform: uppercase;
+      padding: .4rem 1rem; border-radius: 100px; margin-bottom: 1rem;
+    }
+    .section-header h2 {
+      font-family: 'Fraunces', serif; font-size: clamp(2rem,4vw,3rem);
+      font-weight: 900; color: var(--dark); line-height: 1.15;
+    }
+    .steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 2.5rem; }
+    .step {
+      background: #fff; border-radius: 20px; padding: 2.5rem 2rem;
+      border: 1px solid rgba(0,0,0,.06);
+      transition: transform .25s, box-shadow .25s;
+    }
+    .step:hover { transform: translateY(-6px); box-shadow: 0 16px 40px rgba(0,0,0,.08); }
+    .step-num {
+      font-family: 'Fraunces', serif; font-size: 3.5rem; font-weight: 900;
+      color: var(--lime); line-height: 1; margin-bottom: .8rem;
+    }
+    .step h3 { font-size: 1.15rem; font-weight: 600; color: var(--dark); margin-bottom: .6rem; }
+    .step p { font-size: .9rem; color: #666; line-height: 1.7; }
+
+    /* ── ROLES ── */
+    .roles { padding: 4rem 5% 6rem; background: #fff; }
+    .roles-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-top: 3rem; }
+    .role-card {
+      border-radius: 24px; padding: 3rem;
+      position: relative; overflow: hidden;
+    }
+    .role-card.donor { background: linear-gradient(135deg, #d8f3dc, #b7e4c7); }
+    .role-card.volunteer { background: linear-gradient(135deg, #ffe8d6, #ffcba4); }
+    .role-icon { font-size: 3rem; margin-bottom: 1.2rem; }
+    .role-card h3 { font-family:'Fraunces',serif; font-size:1.6rem; font-weight:900; color:var(--dark); margin-bottom:.7rem; }
+    .role-card p { font-size:.93rem; color:#444; line-height:1.7; margin-bottom:1.5rem; }
+    .role-link {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-weight: 600; font-size: .9rem; color: var(--green);
+      text-decoration: none;
+    }
+    .role-link::after { content: '→'; transition: transform .2s; }
+    .role-link:hover::after { transform: translateX(4px); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark); color: #aaa;
+      text-align: center; padding: 2.5rem 5%;
+      font-size: .85rem;
+    }
+    footer a { color: var(--lime); text-decoration: none; }
+
+    /* ── responsive ── */
+    @media(max-width: 768px) {
+      .hero { grid-template-columns: 1fr; padding-top: 7rem; }
+      .hero-visual { display: none; }
+      .stats { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: 1fr; }
+      .roles-grid { grid-template-columns: 1fr; }
+      nav ul { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Rescue<span>Bite</span></div>
+  <ul>
+    <li><a href="#how">How it Works</a></li>
+    <li><a href="login.html">Login</a></li>
+    <li><a href="register.html" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div>
+    <div class="hero-tag">🌱 Fighting Food Waste Together</div>
+    <h1>Don't waste food.<br/><em>Rescue it.</em></h1>
+    <p>RescueBite connects food donors with volunteers to ensure surplus meals reach those who need them — before they reach the bin.</p>
+    <div class="hero-btns">
+      <a href="register.html" class="btn-primary">Join as Donor</a>
+      <a href="register.html?role=volunteer" class="btn-outline">Volunteer</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-card">
+      <div class="card-emoji">🍱</div>
+      <div class="card-title">Biryani — 15 Boxes</div>
+      <div class="card-sub">Posted 5 mins ago · Vijay Nagar, Indore</div>
+      <div class="card-bar"><div class="card-bar-fill"></div></div>
+      <div class="card-stat">3 of 15 claimed</div>
+    </div>
+    <div class="badge">🚀 Live now</div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="stats">
+  <div><div class="stat-num" id="stat-meals">2,400+</div><div class="stat-label">Meals Rescued</div></div>
+  <div><div class="stat-num" id="stat-volunteers">180</div><div class="stat-label">Active Volunteers</div></div>
+  <div><div class="stat-num" id="stat-donors">95%</div><div class="stat-label">Pickup Success Rate</div></div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="section-header">
+    <div class="section-tag">The Process</div>
+    <h2>Three steps to rescue food</h2>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Donor lists surplus food</h3>
+      <p>Restaurants, caterers, or households log in and post available food — quantity, type, location, and pickup window.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Volunteers get notified</h3>
+      <p>Nearby volunteers see pins appear on the live map. They claim a pickup and head to the donor's location.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Food reaches people</h3>
+      <p>The volunteer delivers food to shelters, community kitchens, or directly to those in need. Zero waste.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section class="roles">
+  <div class="section-header">
+    <div class="section-tag">Join Us</div>
+    <h2>Pick your role</h2>
+  </div>
+  <div class="roles-grid">
+    <div class="role-card donor">
+      <div class="role-icon">🏪</div>
+      <h3>Food Donor</h3>
+      <p>Have surplus food? List it in under 2 minutes. We'll take it from there — no logistics stress, just impact.</p>
+      <a href="register.html" class="role-link">Register as Donor</a>
+    </div>
+    <div class="role-card volunteer">
+      <div class="role-icon">🛵</div>
+      <h3>Volunteer</h3>
+      <p>Got a bike, a few hours, and a heart? Pick up food from donors and deliver it to those who need it most.</p>
+      <a href="register.html?role=volunteer" class="role-link">Register as Volunteer</a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2025 RescueBite · Built with ❤️ for a college project · <a href="login.html">Login</a> · <a href="register.html">Register</a></p>
+</footer>
+
+<script type="module">
+import { initializeApp } from
+  "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, getDocs, query, where } from
+  "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey:            "AIzaSyAoeO9shwyTPeaiueZYAC9NBijaoCL8L0A",
+  authDomain:        "rescuebite-62aad.firebaseapp.com",
+  projectId:         "rescuebite-62aad",
+  storageBucket:     "rescuebite-62aad.firebasestorage.app",
+  messagingSenderId: "462394806163",
+  appId:             "1:462394806163:web:d226e9a5df987886162266"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getFirestore(app);
+
+async function loadImpactStats() {
+  try {
+    // Count total collected food listings (meals rescued)
+    const mealsSnap = await getDocs(
+      query(collection(db, "foodListings"),
+            where("status", "==", "collected"))
+    );
+
+    // Count total volunteers registered
+    const volSnap = await getDocs(
+      query(collection(db, "users"),
+            where("role", "==", "volunteer"))
+    );
+
+    // Count total donors registered
+    const donorSnap = await getDocs(
+      query(collection(db, "users"),
+            where("role", "==", "donor"))
+    );
+
+    // Calculate total quantity of meals from collected listings
+    let totalMeals = 0;
+    mealsSnap.forEach((doc) => {
+      totalMeals += parseInt(doc.data().quantity) || 0;
+    });
+
+    // Update the stats numbers on the page
+    animateCount("stat-meals",     totalMeals             || 0);
+    animateCount("stat-volunteers", volSnap.size           || 0);
+    animateCount("stat-donors",     donorSnap.size         || 0);
+
+  } catch(e) {
+    // If Firestore not reachable, show placeholder numbers
+    console.log("Stats load error:", e);
+  }
+}
+
+// Smooth counting animation — counts up from 0 to target
+function animateCount(elementId, target) {
+  const el = document.getElementById(elementId);
+  if (!el) return;
+  let current = 0;
+  const step     = Math.ceil(target / 40);
+  const interval = setInterval(() => {
+    current += step;
+    if (current >= target) { current = target; clearInterval(interval); }
+    el.textContent = current.toLocaleString() + "+";
+  }, 40);
+}
+
+// Run when page loads
+loadImpactStats();
+</script>
+
+</body>
+</html>

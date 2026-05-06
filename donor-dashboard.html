@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Donor Dashboard — RescueBite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cabinet+Grotesk:wght@400;500;700;800&family=Sentient:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --g900: #0f2e1e;
+      --g700: #1d5235;
+      --g500: #2d7a50;
+      --g300: #5fba85;
+      --g100: #c6f0d8;
+      --g50:  #edfaf3;
+      --sand: #faf7f0;
+      --ink:  #141414;
+      --muted: #7a8a80;
+      --border: #e4ede8;
+      --sidebar-w: 252px;
+      --radius: 14px;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Cabinet Grotesk', sans-serif;
+      background: var(--sand);
+      color: var(--ink);
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════ SIDEBAR */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--g900);
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      bottom: -60px; left: -60px;
+      width: 240px; height: 240px;
+      background: radial-gradient(circle, rgba(95,186,133,.18) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .sb-top {
+      padding: 2rem 1.6rem 1.2rem;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .sb-logo {
+      font-family: 'Sentient', serif;
+      font-size: 1.45rem; font-weight: 700;
+      color: #fff; letter-spacing: -.3px;
+      margin-bottom: 1.6rem;
+    }
+    .sb-logo em { font-style: italic; color: var(--g300); }
+
+    .sb-profile {
+      display: flex; align-items: center; gap: .75rem;
+    }
+    .sb-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--g500), var(--g300));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1rem; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .sb-profile-info strong {
+      display: block; font-size: .88rem; color: #fff; font-weight: 700;
+    }
+    .sb-profile-info span {
+      font-size: .72rem; color: rgba(255,255,255,.4);
+    }
+
+    .sb-nav {
+      padding: 1.2rem .8rem;
+      flex: 1;
+    }
+    .sb-nav-label {
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+      text-transform: uppercase; color: rgba(255,255,255,.25);
+      padding: 0 .8rem; margin-bottom: .5rem; margin-top: .8rem;
+    }
+    .sb-link {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .65rem .9rem;
+      border-radius: 9px;
+      color: rgba(255,255,255,.5);
+      text-decoration: none;
+      font-size: .875rem; font-weight: 500;
+      transition: background .15s, color .15s;
+      cursor: pointer;
+      margin-bottom: 2px;
+    }
+    .sb-link:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.85); }
+    .sb-link.active { background: var(--g700); color: #fff; }
+    .sb-link .ico { font-size: 1rem; width: 1.25rem; text-align: center; }
+    .sb-link .pill {
+      margin-left: auto; background: var(--g500);
+      color: #fff; font-size: .65rem; font-weight: 700;
+      padding: .15rem .45rem; border-radius: 100px;
+    }
+
+    .sb-bottom {
+      padding: 1rem .8rem 1.5rem;
+      border-top: 1px solid rgba(255,255,255,.06);
+    }
+    .sb-logout {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .65rem .9rem; border-radius: 9px;
+      color: rgba(255,255,255,.35); font-size: .875rem;
+      cursor: pointer; transition: color .15s;
+    }
+    .sb-logout:hover { color: #f87171; }
+
+    /* ═══════════════════════════════ MAIN */
+    .main {
+      flex: 1; display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* topbar */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 0 2.5rem;
+      height: 64px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .topbar-left h1 {
+      font-family: 'Sentient', serif;
+      font-size: 1.3rem; font-weight: 700;
+    }
+    .topbar-left p { font-size: .8rem; color: var(--muted); margin-top: 1px; }
+    .topbar-right { display: flex; align-items: center; gap: .8rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: .4rem;
+      padding: .55rem 1.25rem; border-radius: 9px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: .875rem; font-weight: 700;
+      cursor: pointer; border: none; transition: all .15s;
+      text-decoration: none;
+    }
+    .btn-primary {
+      background: var(--g500); color: #fff;
+      box-shadow: 0 2px 12px rgba(45,122,80,.25);
+    }
+    .btn-primary:hover { background: var(--g700); transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1.5px solid var(--border);
+    }
+    .btn-ghost:hover { border-color: var(--g300); color: var(--g500); }
+
+    /* scroll area */
+    .scroll-area {
+      flex: 1; overflow-y: auto; padding: 2rem 2.5rem;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+
+    /* ═══════════════════════════════ STAT CARDS */
+    .stats-row {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem; margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: #fff; border-radius: var(--radius);
+      border: 1px solid var(--border);
+      padding: 1.4rem 1.5rem;
+      position: relative; overflow: hidden;
+      animation: fadeUp .4s ease both;
+    }
+    .stat-card:nth-child(1) { animation-delay: .05s; }
+    .stat-card:nth-child(2) { animation-delay: .1s;  }
+    .stat-card:nth-child(3) { animation-delay: .15s; }
+    .stat-card:nth-child(4) { animation-delay: .2s;  }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .stat-card::after {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, var(--g500), var(--g300));
+      opacity: 0; transition: opacity .2s;
+    }
+    .stat-card:hover::after { opacity: 1; }
+    .stat-icon {
+      font-size: 1.5rem; margin-bottom: .8rem;
+      width: 40px; height: 40px; border-radius: 10px;
+      background: var(--g50); display: flex; align-items: center;
+      justify-content: center;
+    }
+    .stat-label { font-size: .72rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: .3rem; }
+    .stat-val { font-family: 'Sentient', serif; font-size: 2.1rem; font-weight: 700; color: var(--ink); line-height: 1; }
+    .stat-sub { font-size: .75rem; color: var(--muted); margin-top: .3rem; }
+
+    /* ═══════════════════════════════ TWO-COL GRID */
+    .grid-2 { display: grid; grid-template-columns: 1.1fr .9fr; gap: 1.5rem; }
+
+    /* ═══════════════════════════════ PANELS */
+    .panel {
+      background: #fff; border-radius: var(--radius);
+      border: 1px solid var(--border);
+      animation: fadeUp .4s ease .25s both;
+    }
+    .panel-head {
+      padding: 1.3rem 1.6rem;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .panel-head h2 {
+      font-size: 1rem; font-weight: 800;
+    }
+    .panel-head-action {
+      font-size: .78rem; color: var(--g500);
+      cursor: pointer; font-weight: 700;
+      background: var(--g50); padding: .3rem .75rem;
+      border-radius: 100px; border: none;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      transition: background .15s;
+    }
+    .panel-head-action:hover { background: var(--g100); }
+    .panel-body { padding: 1.6rem; }
+
+    /* ═══════════════════════════════ FORM */
+    .form-group { margin-bottom: 1.1rem; }
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+
+    label {
+      display: block; font-size: .75rem; font-weight: 700;
+      color: #555; margin-bottom: .4rem; letter-spacing: .02em;
+    }
+    label .req { color: var(--g500); margin-left: 2px; }
+
+    input[type=text], input[type=number], input[type=time],
+    select, textarea {
+      width: 100%;
+      padding: .72rem .95rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: .9rem;
+      background: #fafaf8;
+      color: var(--ink);
+      outline: none;
+      transition: border-color .15s, box-shadow .15s, background .15s;
+      appearance: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--g500);
+      box-shadow: 0 0 0 3px rgba(45,122,80,.1);
+      background: #fff;
+    }
+    textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
+    select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237a8a80' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right .9rem center; padding-right: 2.5rem; }
+
+    .form-submit {
+      width: 100%; background: var(--g900); color: #fff;
+      padding: .9rem; border: none; border-radius: 10px;
+      font-family: 'Cabinet Grotesk', sans-serif;
+      font-size: .95rem; font-weight: 800;
+      cursor: pointer; margin-top: .4rem;
+      transition: background .15s, transform .1s;
+      letter-spacing: .01em;
+    }
+    .form-submit:hover { background: var(--g700); transform: translateY(-1px); }
+    .form-submit:active { transform: translateY(0); }
+    .form-submit:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+
+    /* food type chips */
+    .chip-group { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .chip {
+      padding: .45rem 1rem; border-radius: 100px;
+      border: 1.5px solid var(--border);
+      font-size: .8rem; font-weight: 700;
+      cursor: pointer; transition: all .15s;
+      background: #fafaf8;
+      font-family: 'Cabinet Grotesk', sans-serif;
+    }
+    .chip:hover { border-color: var(--g300); }
+    .chip.selected { background: var(--g900); color: #fff; border-color: var(--g900); }
+
+    /* flash message */
+    .flash {
+      padding: .75rem 1rem; border-radius: 9px;
+      font-size: .85rem; font-weight: 600;
+      margin-bottom: 1rem; display: none;
+      animation: flashIn .25s ease;
+    }
+    @keyframes flashIn { from { opacity:0; transform:translateY(-4px);} to{opacity:1;transform:none;} }
+    .flash.ok  { background: #dcfce7; color: #15803d; border: 1px solid #86efac; display: block; }
+    .flash.err { background: #fee2e2; color: #dc2626; border: 1px solid #fca5a5; display: block; }
+
+    /* ═══════════════════════════════ DONATION LIST */
+    .donation-list { max-height: 520px; overflow-y: auto; }
+    .d-item {
+      display: flex; align-items: flex-start; gap: .9rem;
+      padding: .9rem 0;
+      border-bottom: 1px solid var(--border);
+      animation: fadeUp .3s ease both;
+    }
+    .d-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .d-icon {
+      width: 42px; height: 42px; border-radius: 10px;
+      background: var(--g50); display: flex; align-items: center;
+      justify-content: center; font-size: 1.2rem; flex-shrink: 0;
+    }
+    .d-body { flex: 1; min-width: 0; }
+    .d-name { font-size: .9rem; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .d-meta { font-size: .75rem; color: var(--muted); margin-top: 2px; }
+    .d-right { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; flex-shrink: 0; }
+    .status-badge {
+      font-size: .68rem; font-weight: 800; padding: .25rem .65rem;
+      border-radius: 100px; text-transform: uppercase; letter-spacing: .05em;
+    }
+    .s-active    { background: #dcfce7; color: #15803d; }
+    .s-claimed   { background: #dbeafe; color: #1d4ed8; }
+    .s-completed { background: #f3f4f6; color: #6b7280; }
+    .s-expired   { background: #fee2e2; color: #dc2626; }
+    .d-time { font-size: .72rem; color: var(--muted); }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .empty-state .e-icon { font-size: 2.5rem; margin-bottom: .6rem; opacity: .4; }
+    .empty-state p { font-size: .875rem; }
+
+    /* loading skeleton */
+    .skeleton {
+      background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 6px; height: 14px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ═══════════════════════════════ RESPONSIVE */
+    @media (max-width: 1024px) {
+      .grid-2 { grid-template-columns: 1fr; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 720px) {
+      .sidebar { display: none; }
+      .scroll-area { padding: 1.2rem; }
+      .topbar { padding: 0 1.2rem; }
+      .stats-row { grid-template-columns: 1fr 1fr; }
+      .form-grid-2, .form-grid-3 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sb-top">
+    <div class="sb-logo">Rescue<em>Bite</em></div>
+    <div class="sb-profile">
+      <div class="sb-avatar" id="avatarLetter">?</div>
+      <div class="sb-profile-info">
+        <strong id="sbName">Loading…</strong>
+        <span>Food Donor</span>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-nav-label">Menu</div>
+    <a class="sb-link active">
+      <span class="ico">📊</span> Overview
+    </a>
+    <a class="sb-link" onclick="scrollToForm()">
+      <span class="ico">➕</span> Post Food
+    </a>
+    <a class="sb-link" onclick="loadDonations()">
+      <span class="ico">📋</span> My Listings
+      <span class="pill" id="activeCount">0</span>
+    </a>
+    <div class="sb-nav-label">Account</div>
+    <a class="sb-link" href="index.html">
+      <span class="ico">🏠</span> Home
+    </a>
+  </nav>
+
+  <div class="sb-bottom">
+    <div class="sb-logout" onclick="handleLogout()">
+      <span class="ico">🚪</span> Sign out
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Donor Dashboard</h1>
+      <p id="greetLine">Good to see you back.</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-ghost" onclick="loadDonations()">↻ Refresh</button>
+      <button class="btn btn-primary" onclick="scrollToForm()">＋ Post Food</button>
+    </div>
+  </header>
+
+  <!-- Scrollable content -->
+  <div class="scroll-area">
+
+    <!-- STAT CARDS -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-icon">🍱</div>
+        <div class="stat-label">Total Posted</div>
+        <div class="stat-val" id="statTotal">—</div>
+        <div class="stat-sub">all time</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🛵</div>
+        <div class="stat-label">Claimed</div>
+        <div class="stat-val" id="statClaimed">—</div>
+        <div class="stat-sub">by volunteers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-label">Live Now</div>
+        <div class="stat-val" id="statLive">—</div>
+        <div class="stat-sub">active listings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🌱</div>
+        <div class="stat-label">Meals Saved</div>
+        <div class="stat-val" id="statMeals">—</div>
+        <div class="stat-sub">approx. portions</div>
+      </div>
+    </div>
+
+    <!-- TWO COL -->
+    <div class="grid-2">
+
+      <!-- LEFT — POST FORM -->
+      <div class="panel" id="postSection">
+        <div class="panel-head">
+          <h2>📦 Post Surplus Food</h2>
+        </div>
+        <div class="panel-body">
+          <div class="flash" id="formFlash"></div>
+
+          <div class="form-group">
+            <label>Food name <span class="req">*</span></label>
+            <input type="text" id="foodName" placeholder="e.g. Dal Rice, Biryani, Sandwiches"/>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Quantity <span class="req">*</span></label>
+              <input type="number" id="qty" placeholder="20" min="1"/>
+            </div>
+            <div class="form-group">
+              <label>Unit</label>
+              <select id="unit">
+                <option>Boxes</option>
+                <option>Plates</option>
+                <option>Kg</option>
+                <option>Litres</option>
+                <option>Packets</option>
+                <option>Portions</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Food type chips -->
+          <div class="form-group">
+            <label>Food type</label>
+            <div class="chip-group" id="chipGroup">
+              <span class="chip selected" data-val="Vegetarian">🟢 Veg</span>
+              <span class="chip" data-val="Non-Vegetarian">🔴 Non-Veg</span>
+              <span class="chip" data-val="Vegan">🔵 Vegan</span>
+              <span class="chip" data-val="Mixed">🟡 Mixed</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Pickup address <span class="req">*</span></label>
+            <input type="text" id="pickupAddress" placeholder="Full address for volunteer"/>
+          </div>
+
+          <!--
+            ══════════════════════════════════════════════════
+            GEOCODING NOTE:
+            To show this listing as a real pin on the map,
+            we geocode this address using the Google Maps
+            Geocoding API and store lat/lng in Firestore.
+            Make sure your Maps API key has Geocoding enabled
+            at console.cloud.google.com → APIs & Services.
+            ══════════════════════════════════════════════════
+          -->
+
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Available from</label>
+              <input type="time" id="availFrom"/>
+            </div>
+            <div class="form-group">
+              <label>Available until <span class="req">*</span></label>
+              <input type="time" id="availUntil"/>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Notes (allergens, contact, packaging…)</label>
+            <textarea id="notes" placeholder="Optional extra info for the volunteer"></textarea>
+          </div>
+
+          <button class="form-submit" id="submitBtn" onclick="postFood()">
+            Post Food Now →
+          </button>
+        </div>
+      </div>
+
+      <!-- RIGHT — DONATIONS LIST -->
+      <div class="panel">
+        <div class="panel-head">
+          <h2>📋 My Listings</h2>
+          <button class="panel-head-action" onclick="loadDonations()">↻ Refresh</button>
+        </div>
+        <div class="panel-body" style="padding-top:0;">
+          <div class="donation-list" id="donationList">
+            <!-- skeleton while loading -->
+            <div style="padding:1.2rem 0; display:flex; flex-direction:column; gap:.8rem;">
+              <div class="skeleton" style="width:60%; height:12px;"></div>
+              <div class="skeleton" style="width:40%; height:10px;"></div>
+              <div class="skeleton" style="width:70%; height:12px; margin-top:.5rem;"></div>
+              <div class="skeleton" style="width:45%; height:10px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /grid-2 -->
+  </div><!-- /scroll-area -->
+</div><!-- /main -->
+
+
+<!-- ════════════════════════════════════════════════════════
+  ██████╗ ██╗██████╗ ███████╗██████╗  █████╗ ███████╗███████╗
+  ██╔════╝ ██║██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝
+  █████╗   ██║██████╔╝█████╗  ██████╔╝███████║███████╗█████╗
+  ██╔══╝   ██║██╔══██╗██╔══╝  ██╔══██╗██╔══██║╚════██║██╔══╝
+  ██║      ██║██║  ██║███████╗██████╔╝██║  ██║███████║███████╗
+  ╚═╝      ╚═╝╚═╝  ╚═╝╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝
+
+  STEP 1 ─ Paste your Firebase config below (replace all YOUR_* values)
+           Get it from: Firebase Console → Project Settings → Your Apps
+  ════════════════════════════════════════════════════════ -->
+    <script type="module" src="js/auth-guard.js"></script>
+  <script type="module" src="js/donor.js"></script>
+<script type="module">
+
+import { initializeApp }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore, collection, addDoc, query, where,
+  orderBy, getDocs, doc, getDoc, serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ─── YOUR FIREBASE CONFIG ─── */
+const firebaseConfig = {
+  apiKey: "AIzaSyAoeO9shwyTPeaiueZYAC9NBijaoCL8L0A",
+  authDomain: "rescuebite-62aad.firebaseapp.com",
+  projectId: "rescuebite-62aad",
+  storageBucket: "rescuebite-62aad.firebasestorage.app",
+  messagingSenderId: "462394806163",
+  appId: "1:462394806163:web:d226e9a5df987886162266"
+
+};
+/* ─────────────────────────── */
+
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+let currentUser  = null;
+let selectedType = 'Vegetarian';
+
+/* ── chip selector ── */
+document.querySelectorAll('#chipGroup .chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    document.querySelectorAll('#chipGroup .chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    selectedType = chip.dataset.val;
+  });
+});
+
+/* ── auth guard ── */
+onAuthStateChanged(auth, async user => {
+  if (!user) { window.location.href = 'login.html'; return; }
+  currentUser = user;
+
+  const snap = await getDoc(doc(db, 'users', user.uid));
+  if (snap.exists()) {
+    const d = snap.data();
+    const name = d.firstName + ' ' + d.lastName;
+    document.getElementById('sbName').textContent      = name;
+    document.getElementById('avatarLetter').textContent = d.firstName?.[0] ?? '?';
+    document.getElementById('greetLine').textContent   = 'Welcome back, ' + d.firstName + '!';
+    if (d.address) document.getElementById('pickupAddress').value = d.address;
+  }
+  loadDonations();
+});
+
+/* ═══════════════════════════════════════════════════
+   POST FOOD
+   ─ Saves a new document to /donations/{autoId}
+   ─ Fields stored: donorId, foodName, quantity, unit,
+     foodType, pickupAddress, availFrom, availUntil,
+     notes, status:"active", createdAt (server timestamp)
+   ═══════════════════════════════════════════════════ */
+window.postFood = async function () {
+  const flash   = document.getElementById('formFlash');
+  const btn     = document.getElementById('submitBtn');
+  flash.className = 'flash';
+
+  const foodName = document.getElementById('foodName').value.trim();
+  const qty      = document.getElementById('qty').value;
+  const address  = document.getElementById('pickupAddress').value.trim();
+  const until    = document.getElementById('availUntil').value;
+
+  if (!foodName || !qty || !address || !until) {
+    flash.className = 'flash err';
+    flash.textContent = '⚠️  Please fill in all required fields (marked with *).';
+    return;
+  }
+  if (Number(qty) < 1) {
+    flash.className = 'flash err';
+    flash.textContent = '⚠️  Quantity must be at least 1.';
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Posting…';
+
+  try {
+    await addDoc(collection(db, 'donations'), {
+      donorId:       currentUser.uid,
+      foodName,
+      quantity:      Number(qty),
+      unit:          document.getElementById('unit').value,
+      foodType:      selectedType,
+      pickupAddress: address,
+      availFrom:     document.getElementById('availFrom').value,
+      availUntil:    until,
+      notes:         document.getElementById('notes').value.trim(),
+      status:        'active',        // active → claimed → completed
+      volunteerId:   null,
+      createdAt:     serverTimestamp(),
+    });
+
+    flash.className = 'flash ok';
+    flash.textContent = '✅  Food posted! Volunteers will see it on the map now.';
+
+    /* reset */
+    ['foodName','qty','availFrom','availUntil','notes'].forEach(id =>
+      document.getElementById(id).value = '');
+
+    loadDonations();
+  } catch (err) {
+    flash.className = 'flash err';
+    flash.textContent = '❌  ' + err.message;
+  } finally {
+    btn.disabled = false; btn.textContent = 'Post Food Now →';
+  }
+};
+
+/* ═══════════════════════════════════════════════════
+   LOAD DONATIONS
+   ─ Queries /donations where donorId == currentUser.uid
+   ─ Orders by createdAt descending
+   ─ Updates stat cards + renders list
+   ═══════════════════════════════════════════════════ */
+window.loadDonations = async function () {
+  if (!currentUser) return;
+  const listEl = document.getElementById('donationList');
+  listEl.innerHTML = '<div style="padding:1rem 0;color:#aaa;font-size:.85rem;">Loading…</div>';
+
+  try {
+    const q    = query(
+      collection(db, 'donations'),
+      where('donorId', '==', currentUser.uid),
+      orderBy('createdAt', 'desc')
+    );
+    const snap = await getDocs(q);
+
+    let total=0, claimed=0, live=0, meals=0;
+    const items = [];
+
+    snap.forEach(d => {
+      const data = { id: d.id, ...d.data() };
+      items.push(data);
+      total++;
+      if (data.status === 'active')                 live++;
+      if (data.status === 'claimed' || data.status === 'completed') claimed++;
+      meals += Number(data.quantity) || 0;
+    });
+
+    /* update stats */
+    document.getElementById('statTotal').textContent  = total;
+    document.getElementById('statClaimed').textContent = claimed;
+    document.getElementById('statLive').textContent   = live;
+    document.getElementById('statMeals').textContent  = meals;
+    document.getElementById('activeCount').textContent = live;
+
+    /* render list */
+    if (!items.length) {
+      listEl.innerHTML = `
+        <div class="empty-state">
+          <div class="e-icon">📭</div>
+          <p>No listings yet.<br>Post your first food donation above!</p>
+        </div>`;
+      return;
+    }
+
+    const typeEmoji = { Vegetarian:'🟢', 'Non-Vegetarian':'🔴', Vegan:'🔵', Mixed:'🟡' };
+    const statusClass = { active:'s-active', claimed:'s-claimed', completed:'s-completed', expired:'s-expired' };
+
+    listEl.innerHTML = items.map((d, i) => `
+      <div class="d-item" style="animation-delay:${i * .05}s">
+        <div class="d-icon">${typeEmoji[d.foodType] ?? '🍱'}</div>
+        <div class="d-body">
+          <div class="d-name">${d.foodName}</div>
+          <div class="d-meta">${d.quantity} ${d.unit} · Until ${d.availUntil} · ${d.pickupAddress}</div>
+        </div>
+        <div class="d-right">
+          <span class="status-badge ${statusClass[d.status] ?? 's-completed'}">${d.status}</span>
+          <span class="d-time">${d.foodType}</span>
+        </div>
+      </div>`
+    ).join('');
+
+  } catch (err) {
+    listEl.innerHTML = `<p style="color:#dc2626;font-size:.85rem;padding:1rem 0;">${err.message}</p>`;
+  }
+};
+
+/* ── helpers ── */
+window.scrollToForm = () =>
+  document.getElementById('postSection').scrollIntoView({ behavior: 'smooth' });
+
+window.handleLogout = async () => {
+  await signOut(auth);
+  window.location.href = 'login.html';
+};
+</script>
+</body>
+</html>

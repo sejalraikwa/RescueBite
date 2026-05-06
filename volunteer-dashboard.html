@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Volunteer Dashboard — RescueBite</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    :root{--green:#2d6a4f;--lime:#95d5b2;--cream:#fefae0;--earth:#b5838d;--dark:#1a1a1a;--sidebar:240px;}
+    body{font-family:'DM Sans',sans-serif;background:#f4f6f4;color:var(--dark);display:flex;min-height:100vh;}
+
+    /* SIDEBAR */
+    .sidebar{width:var(--sidebar);background:#1a4030;color:#fff;display:flex;flex-direction:column;padding:2rem 1.5rem;position:fixed;top:0;left:0;bottom:0;z-index:50;}
+    .sb-logo{font-family:'Fraunces',serif;font-size:1.4rem;font-weight:900;margin-bottom:3rem;}
+    .sb-logo span{color:var(--lime);}
+    .sb-badge{display:inline-block;background:rgba(149,213,178,.2);color:var(--lime);font-size:.7rem;font-weight:600;padding:.2rem .6rem;border-radius:100px;margin-left:.5rem;letter-spacing:.05em;}
+    .sb-nav{flex:1;}
+    .sb-nav a{display:flex;align-items:center;gap:.7rem;padding:.75rem .9rem;border-radius:10px;color:rgba(255,255,255,.7);text-decoration:none;font-size:.9rem;margin-bottom:.3rem;transition:background .2s,color .2s;}
+    .sb-nav a:hover,.sb-nav a.active{background:rgba(255,255,255,.15);color:#fff;}
+    .sb-nav a .icon{font-size:1.1rem;width:1.4rem;text-align:center;}
+    .sb-user{padding:.9rem;background:rgba(255,255,255,.1);border-radius:12px;font-size:.82rem;}
+    .sb-user strong{display:block;font-size:.9rem;}
+    .sb-user small{opacity:.65;}
+    .sb-logout{display:block;margin-top:.8rem;color:rgba(255,255,255,.5);font-size:.8rem;cursor:pointer;text-decoration:underline;}
+
+    /* MAIN */
+    .main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;}
+
+    /* MAP STRIP */
+    .map-strip{position:relative;height:340px;background:#e8f5e9;}
+    #map{width:100%;height:100%;}
+    .map-overlay{position:absolute;top:1rem;right:1rem;background:#fff;border-radius:12px;padding:.8rem 1.2rem;font-size:.82rem;font-weight:500;box-shadow:0 4px 16px rgba(0,0,0,.12);color:var(--green);}
+
+    /* CONTENT */
+    .content{padding:2rem;}
+    .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem;}
+    .topbar h1{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:900;}
+    .filter-bar{display:flex;gap:.8rem;flex-wrap:wrap;}
+    .filter-btn{padding:.5rem 1.2rem;border-radius:100px;border:1.5px solid #e2e8f0;background:#fff;font-family:'DM Sans',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;}
+    .filter-btn.active{background:var(--green);color:#fff;border-color:var(--green);}
+
+    /* stats */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem;}
+    .stat-card{background:#fff;border-radius:14px;padding:1.3rem;border:1px solid rgba(0,0,0,.05);}
+    .sc-label{font-size:.75rem;color:#888;font-weight:500;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.4rem;}
+    .sc-val{font-family:'Fraunces',serif;font-size:1.9rem;font-weight:900;}
+
+    /* donation cards */
+    .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.2rem;}
+    .food-card{background:#fff;border-radius:16px;padding:1.5rem;border:1px solid rgba(0,0,0,.06);transition:transform .2s,box-shadow .2s;}
+    .food-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.09);}
+    .fc-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:.8rem;}
+    .fc-emoji{font-size:2rem;}
+    .fc-badge{padding:.25rem .7rem;border-radius:100px;font-size:.7rem;font-weight:600;background:#dcfce7;color:#16a34a;}
+    .fc-badge.veg{background:#dcfce7;color:#16a34a;}
+    .fc-badge.non{background:#fee2e2;color:#dc2626;}
+    .fc-badge.vegan{background:#e0f2fe;color:#0369a1;}
+    .fc-title{font-weight:600;font-size:1rem;margin-bottom:.3rem;}
+    .fc-qty{font-size:.85rem;color:var(--green);font-weight:500;margin-bottom:.6rem;}
+    .fc-meta{font-size:.78rem;color:#aaa;line-height:1.7;margin-bottom:1rem;}
+    .fc-meta strong{color:#555;}
+    .fc-actions{display:flex;gap:.7rem;}
+    .btn-claim{flex:1;background:var(--green);color:#fff;border:none;padding:.7rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-weight:500;font-size:.85rem;cursor:pointer;transition:background .2s;}
+    .btn-claim:hover{background:#1f4d39;}
+    .btn-claim:disabled{background:#aaa;cursor:not-allowed;}
+    .btn-map{background:#f0faf5;color:var(--green);border:none;padding:.7rem 1rem;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:.85rem;cursor:pointer;transition:background .2s;}
+    .btn-map:hover{background:#dcfce7;}
+
+    .empty{text-align:center;padding:4rem;color:#ccc;}
+    .empty-icon{font-size:3.5rem;margin-bottom:.8rem;}
+    .section-title{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:700;margin-bottom:1.2rem;}
+
+    @media(max-width:900px){.stats-row{grid-template-columns:1fr 1fr;}}
+    @media(max-width:640px){.sidebar{display:none;}.main{margin-left:0;}.map-strip{height:220px;}}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">Rescue<span>Bite</span> <span class="sb-badge">VOL</span></div>
+  <nav class="sb-nav">
+    <a href="#" class="active"><span class="icon">🗺️</span> Live Map</a>
+    <a href="#available"><span class="icon">🍱</span> Available Food</a>
+    <a href="#mypickups"><span class="icon">📦</span> My Pickups</a>
+    <a href="index.html"><span class="icon">🏠</span> Home</a>
+  </nav>
+  <div class="sb-user">
+    <strong id="sb-name">Loading…</strong>
+    <small id="sb-vehicle"></small>
+    <a class="sb-logout" onclick="handleLogout()">Sign out</a>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- MAP -->
+  <div class="map-strip">
+    <!--
+      STEP 2: Enable Google Maps JavaScript API in console.cloud.google.com
+      Replace YOUR_MAPS_API_KEY below with your actual key
+    -->
+    <div id="map"></div>
+    <div class="map-overlay">🟢 <span id="liveCount">0</span> active pickups near you</div>
+  </div>
+
+  <div class="content">
+    <div class="topbar">
+      <h1>Volunteer Dashboard</h1>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCards('all',this)">All</button>
+        <button class="filter-btn" onclick="filterCards('Vegetarian',this)">🟢 Veg</button>
+        <button class="filter-btn" onclick="filterCards('Non-Vegetarian',this)">🔴 Non-Veg</button>
+        <button class="filter-btn" onclick="filterCards('Vegan',this)">🔵 Vegan</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="sc-label">Pickups Done</div><div class="sc-val" id="pickupsDone">0</div></div>
+      <div class="stat-card"><div class="sc-label">Meals Delivered</div><div class="sc-val" id="mealsDelivered">0</div></div>
+      <div class="stat-card"><div class="sc-label">Active Now</div><div class="sc-val" id="activeDonations">0</div></div>
+      <div class="stat-card"><div class="sc-label">Impact Score</div><div class="sc-val" id="impactScore">0</div></div>
+    </div>
+
+    <div class="section-title" id="available">Available Food Near You</div>
+    <div class="cards-grid" id="foodCards">
+      <div class="empty"><div class="empty-icon">⏳</div>Loading available donations…</div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Google Maps API
+     Replace YOUR_MAPS_API_KEY with your real key from console.cloud.google.com
+     Enable "Maps JavaScript API" in your project -->
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAJvZwH97rlObVgXPBO73ix3cxBoWW3U-M&callback=initMap" async defer></script>
+  <script type="module" src="js/auth-guard.js"></script>
+  <script type="module" src="js/volunteer.js"></script>
+
+<script type="module">
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, collection, query, where, orderBy, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+
+  const firebaseConfig = {
+  apiKey: "AIzaSyAoeO9shwyTPeaiueZYAC9NBijaoCL8L0A",
+  authDomain: "rescuebite-62aad.firebaseapp.com",
+  projectId: "rescuebite-62aad",
+  storageBucket: "rescuebite-62aad.firebasestorage.app",
+  messagingSenderId: "462394806163",
+  appId: "1:462394806163:web:d226e9a5df987886162266",
+  measurementId: "G-QFL8SX6TXB"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+  let currentUser = null;
+  let allDonations = [];
+  let map, markers = [];
+
+  // Auth guard
+  onAuthStateChanged(auth, async user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    currentUser = user;
+    const snap = await getDoc(doc(db, 'users', user.uid));
+    if (snap.exists()) {
+      const d = snap.data();
+      document.getElementById('sb-name').textContent    = d.firstName + ' ' + d.lastName;
+      document.getElementById('sb-vehicle').textContent = '🛵 ' + (d.vehicle || 'Volunteer');
+    }
+    loadDonations();
+    loadMyPickups();
+  });
+
+  // ── LOAD ALL ACTIVE DONATIONS ──
+  window.loadDonations = async function() {
+    try {
+      const q    = query(collection(db,'donations'), where('status','==','active'), orderBy('createdAt','desc'));
+      const snap = await getDocs(q);
+
+      allDonations = [];
+      snap.forEach(d => allDonations.push({ id: d.id, ...d.data() }));
+
+      document.getElementById('activeDonations').textContent = allDonations.length;
+      document.getElementById('liveCount').textContent       = allDonations.length;
+
+      renderCards(allDonations);
+      addMapMarkers(allDonations);
+    } catch(err) {
+      document.getElementById('foodCards').innerHTML = `<p style="color:red;">${err.message}</p>`;
+    }
+  };
+
+  // ── RENDER CARDS ──
+  function renderCards(items) {
+    const grid = document.getElementById('foodCards');
+    if (!items.length) {
+      grid.innerHTML = '<div class="empty"><div class="empty-icon">🌟</div>No active donations right now. Check back soon!</div>';
+      return;
+    }
+    grid.innerHTML = items.map(d => {
+      const typeClass = { Vegetarian:'veg', 'Non-Vegetarian':'non', Vegan:'vegan' }[d.foodType] || 'veg';
+      return `
+        <div class="food-card" data-id="${d.id}" data-type="${d.foodType}">
+          <div class="fc-header">
+            <div class="fc-emoji">🍱</div>
+            <span class="fc-badge ${typeClass}">${d.foodType}</span>
+          </div>
+          <div class="fc-title">${d.foodName}</div>
+          <div class="fc-qty">${d.quantity} ${d.unit} available</div>
+          <div class="fc-meta">
+            <strong>📍</strong> ${d.pickupAddress}<br>
+            <strong>⏰</strong> Until ${d.availUntil}
+            ${d.notes ? `<br><strong>📝</strong> ${d.notes}` : ''}
+          </div>
+          <div class="fc-actions">
+            <button class="btn-claim" onclick="claimDonation('${d.id}', this)">🛵 Claim Pickup</button>
+            <button class="btn-map" onclick="focusMapPin('${d.pickupAddress}')">🗺️</button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── FILTER CARDS ──
+  window.filterCards = function(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const filtered = type === 'all' ? allDonations : allDonations.filter(d => d.foodType === type);
+    renderCards(filtered);
+  };
+
+  // ── CLAIM DONATION ──
+  window.claimDonation = async function(donationId, btn) {
+    if (!currentUser) return;
+    btn.disabled = true; btn.textContent = 'Claiming…';
+    try {
+      await updateDoc(doc(db, 'donations', donationId), {
+        status:      'claimed',
+        volunteerId: currentUser.uid,
+        claimedAt:   serverTimestamp(),
+      });
+      btn.textContent = '✅ Claimed!';
+      btn.style.background = '#16a34a';
+      loadDonations();
+    } catch(err) {
+      btn.disabled = false; btn.textContent = '🛵 Claim Pickup';
+      alert('Error: ' + err.message);
+    }
+  };
+
+  // ── LOAD MY PICKUPS (stats) ──
+  async function loadMyPickups() {
+    if (!currentUser) return;
+    try {
+      const q    = query(collection(db,'donations'), where('volunteerId','==',currentUser.uid));
+      const snap = await getDocs(q);
+      let done=0, meals=0;
+      snap.forEach(d => {
+        const data = d.data();
+        if (data.status === 'completed') done++;
+        meals += Number(data.quantity) || 0;
+      });
+      document.getElementById('pickupsDone').textContent    = done;
+      document.getElementById('mealsDelivered').textContent = meals;
+      document.getElementById('impactScore').textContent    = done * 10;
+    } catch(err) { console.error(err); }
+  }
+
+  // ── GOOGLE MAPS ──
+  window.initMap = function() {
+    // Default center: Indore, India
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: { lat: 22.7196, lng: 75.8577 },
+      zoom: 13,
+      styles: [
+        { featureType:'poi', stylers:[{visibility:'off'}] },
+        { featureType:'transit', stylers:[{visibility:'off'}] }
+      ],
+      mapTypeControl: false,
+      streetViewControl: false,
+    });
+
+    // Try to center on user's location
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        map.setCenter({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        // Green dot for volunteer position
+        new google.maps.Marker({
+          position: { lat: pos.coords.latitude, lng: pos.coords.longitude },
+          map,
+          title: 'You are here',
+          icon: { path: google.maps.SymbolPath.CIRCLE, scale: 10, fillColor:'#2d6a4f', fillOpacity:1, strokeColor:'#fff', strokeWeight:2 }
+        });
+      });
+    }
+  };
+
+  // ── ADD MAP PINS for donations ──
+  // NOTE: For a real app, you'd geocode each address or store lat/lng in Firestore.
+  // This example places pins at slight offsets from Indore center for demo.
+  function addMapMarkers(donations) {
+    if (!map) { setTimeout(() => addMapMarkers(donations), 1000); return; }
+    markers.forEach(m => m.setMap(null));
+    markers = [];
+
+    const baseCenter = { lat: 22.7196, lng: 75.8577 };
+    donations.forEach((d, i) => {
+      const jitter = () => (Math.random() - 0.5) * 0.04;
+      const position = { lat: baseCenter.lat + jitter(), lng: baseCenter.lng + jitter() };
+      const marker = new google.maps.Marker({
+        position, map,
+        title: d.foodName,
+        icon: {
+          url: 'https://maps.google.com/mapfiles/ms/icons/green-dot.png',
+        }
+      });
+      const infoWin = new google.maps.InfoWindow({
+        content: `
+          <div style="font-family:'DM Sans',sans-serif;max-width:200px;padding:.3rem">
+            <strong style="color:#2d6a4f">${d.foodName}</strong><br>
+            ${d.quantity} ${d.unit} · ${d.foodType}<br>
+            <small style="color:#888">📍 ${d.pickupAddress}</small><br>
+            <small style="color:#888">⏰ Until ${d.availUntil}</small>
+          </div>`
+      });
+      marker.addListener('click', () => infoWin.open(map, marker));
+      markers.push(marker);
+    });
+  }
+
+  window.focusMapPin = function(address) {
+    // Scroll to map on mobile
+    document.querySelector('.map-strip').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  window.handleLogout = async function() {
+    await signOut(auth);
+    window.location.href = 'login.html';
+  };
+</script>
+
+</body>
+</html>

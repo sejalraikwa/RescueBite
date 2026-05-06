@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — RescueBite</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+    :root{--green:#2d6a4f;--lime:#95d5b2;--cream:#fefae0;--earth:#b5838d;--dark:#1a1a1a;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+
+    .auth-wrap{display:grid;grid-template-columns:1fr 1fr;min-height:560px;max-width:900px;width:100%;border-radius:28px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.15);}
+
+    /* left panel */
+    .auth-left{background:linear-gradient(150deg,var(--green) 0%,#1a4030 100%);padding:3.5rem;display:flex;flex-direction:column;justify-content:space-between;color:#fff;position:relative;overflow:hidden;}
+    .auth-left::after{content:'';position:absolute;bottom:-80px;right:-80px;width:240px;height:240px;background:rgba(149,213,178,.15);border-radius:50%;}
+    .auth-left::before{content:'';position:absolute;top:-60px;left:-60px;width:180px;height:180px;background:rgba(149,213,178,.1);border-radius:50%;}
+    .auth-logo{font-family:'Fraunces',serif;font-size:1.7rem;font-weight:900;letter-spacing:-.5px;}
+    .auth-logo span{color:var(--lime);}
+    .auth-headline{position:relative;z-index:1;}
+    .auth-headline h2{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:900;line-height:1.15;margin-bottom:.8rem;}
+    .auth-headline h2 em{font-style:italic;color:var(--lime);}
+    .auth-headline p{font-size:.9rem;opacity:.7;line-height:1.7;}
+    .auth-left-footer{font-size:.78rem;opacity:.5;position:relative;z-index:1;}
+
+    /* right panel */
+    .auth-right{background:#fff;padding:3.5rem;}
+    .auth-right h3{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:900;color:var(--dark);margin-bottom:.4rem;}
+    .auth-right .sub{font-size:.9rem;color:#888;margin-bottom:2.2rem;}
+    .auth-right .sub a{color:var(--green);text-decoration:none;font-weight:500;}
+
+    .form-group{margin-bottom:1.3rem;}
+    label{display:block;font-size:.82rem;font-weight:500;color:#555;margin-bottom:.45rem;}
+    input[type=email],input[type=password],input[type=text]{
+      width:100%;padding:.85rem 1.1rem;
+      border:1.5px solid #e2e8f0;border-radius:12px;
+      font-size:.95rem;font-family:'DM Sans',sans-serif;
+      background:#fafafa;transition:border-color .2s,box-shadow .2s;
+      outline:none;
+    }
+    input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(45,106,79,.12);background:#fff;}
+    .forgot{display:block;text-align:right;font-size:.8rem;color:var(--green);text-decoration:none;margin-top:.3rem;}
+
+    .btn-submit{
+      width:100%;background:var(--green);color:#fff;border:none;
+      padding:1rem;border-radius:12px;font-size:1rem;font-family:'DM Sans',sans-serif;
+      font-weight:500;cursor:pointer;margin-top:.5rem;
+      transition:background .2s,transform .15s,box-shadow .2s;
+      box-shadow:0 4px 18px rgba(45,106,79,.3);
+    }
+    .btn-submit:hover{background:#1f4d39;transform:translateY(-1px);box-shadow:0 8px 24px rgba(45,106,79,.4);}
+    .btn-submit:active{transform:translateY(0);}
+    .btn-submit:disabled{background:#aaa;cursor:not-allowed;box-shadow:none;transform:none;}
+
+    .divider{display:flex;align-items:center;gap:1rem;margin:1.5rem 0;color:#ccc;font-size:.8rem;}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:#eee;}
+
+    .msg{padding:.9rem 1.1rem;border-radius:10px;font-size:.88rem;margin-bottom:1rem;display:none;}
+    .msg.error{background:#fee2e2;color:#dc2626;border:1px solid #fecaca;display:block;}
+    .msg.success{background:#dcfce7;color:#16a34a;border:1px solid #bbf7d0;display:block;}
+
+    @media(max-width:640px){.auth-wrap{grid-template-columns:1fr;}.auth-left{display:none;}}
+  </style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <!-- LEFT -->
+  <div class="auth-left">
+    <div class="auth-logo">Rescue<span>Bite</span></div>
+    <div class="auth-headline">
+      <h2>Welcome <em>back,</em> rescuer.</h2>
+      <p>Your dashboard is waiting. Login to manage donations or pick up a delivery.</p>
+    </div>
+    <div class="auth-left-footer">© 2025 RescueBite</div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="auth-right">
+    <h3>Sign In</h3>
+    <p class="sub">Don't have an account? <a href="register.html">Register here →</a></p>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="form-group">
+      <label for="email">Email Address</label>
+      <input type="email" id="email" placeholder="you@example.com" autocomplete="email"/>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="••••••••" autocomplete="current-password"/>
+      <a href="#" class="forgot">Forgot password?</a>
+    </div>
+
+    <button class="btn-submit" id="loginBtn" onclick="handleLogin()">Sign In</button>
+
+    <div class="divider">or</div>
+    <p style="text-align:center;font-size:.88rem;color:#888;">New here? <a href="register.html" style="color:var(--green);font-weight:500;">Create a free account</a></p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     STEP 1: Replace the config below with YOUR Firebase config
+     Go to: Firebase Console → Project Settings → Your Apps → SDK setup
+     ══════════════════════════════════════════════════════════ -->
+<script type="module" src="js/login.js">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  // ── PASTE YOUR CONFIG HERE ──
+  const firebaseConfig = {
+  apiKey: "AIzaSyAoeO9shwyTPeaiueZYAC9NBijaoCL8L0A",
+  authDomain: "rescuebite-62aad.firebaseapp.com",
+  projectId: "rescuebite-62aad",
+  storageBucket: "rescuebite-62aad.firebasestorage.app",
+  messagingSenderId: "462394806163",
+  appId: "1:462394806163:web:d226e9a5df987886162266",
+  measurementId: "G-QFL8SX6TXB"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  window.handleLogin = async function() {
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const btn      = document.getElementById('loginBtn');
+    const msg      = document.getElementById('msg');
+
+    msg.className = 'msg'; msg.textContent = '';
+
+    if (!email || !password) {
+      msg.className = 'msg error'; msg.textContent = 'Please fill in all fields.'; return;
+    }
+
+    btn.disabled = true; btn.textContent = 'Signing in…';
+
+    try {
+      const cred   = await signInWithEmailAndPassword(auth, email, password);
+      const uid    = cred.user.uid;
+
+      // Fetch role from Firestore
+      const snap   = await getDoc(doc(db, 'users', uid));
+      const role   = snap.exists() ? snap.data().role : 'donor';
+
+      msg.className = 'msg success'; msg.textContent = 'Login successful! Redirecting…';
+
+      setTimeout(() => {
+        window.location.href = role === 'volunteer'
+          ? 'volunteer-dashboard.html'
+          : 'donor-dashboard.html';
+      }, 800);
+
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Sign In';
+      const map = {
+        'auth/user-not-found':   'No account found with this email.',
+        'auth/wrong-password':   'Incorrect password.',
+        'auth/invalid-email':    'Invalid email address.',
+        'auth/too-many-requests':'Too many attempts. Try again later.',
+      };
+      msg.className = 'msg error';
+      msg.textContent = map[err.code] || 'Login failed: ' + err.message;
+    }
+  };
+
+  // Allow pressing Enter to submit
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') handleLogin();
+  });
+</script>
+
+</body>
+</html>
